@@ -22,30 +22,34 @@ router.post('/', async (req, res)=>{
             }
         })
 
-        if(result){
-            res.status(201).json(result)
-        }
+        res.status(201).json(result)
 
     } catch (e) {
         res.status(400).json({error: "Username and password must be unique"})
     }
 })
 
-//get all items 
+//get all users 
 router.get('/', async (req, res)=>{
     const allUsers = await prisma.user.findMany();
     res.json(allUsers);
 })
 
-//get single item
+//get single user
 router.get('/:id', async (req, res)=>{
     const {id} = req.params
     const user = await prisma.user.findUnique({where: {id: Number(id)}})
+
+    if(!user){
+        return res.status(404).json({error: "User not found"});
+    }
+
     res.json(user)
+
 })
 
 
-//update an item
+//update a user
 router.put('/:id', async (req, res)=>{
     const {id} = req.params
     const {bio, name, image } = req.body;
@@ -55,10 +59,15 @@ router.put('/:id', async (req, res)=>{
             data: { bio, name, image}
         });
 
-        if(result){
-
-            res.status(201).json({success: `Updated Successfully`})
+        if(!result){
+            return res.status(404).json({error: "User not found"});
         }
+
+        res.status(201).json({
+            success: 'Updated Successfully',
+            user: result
+        
+        })
 
     } catch (e) {
         res.status(400).json({error: "Failed to update the user"})
@@ -71,15 +80,15 @@ router.delete('/:id', async (req, res)=>{
     const {id} = req.params
 
     try {
+        
         const result = await prisma.user.delete({
             where: {id: Number(id)}
         });
 
-        if(result){
-
-            res.status(200).json({success: `Item Deleted Successfully`});
-            res.sendStatus(200);
+        if(!result){
+            return res.status(404).json({error: "User not found"});
         }
+        res.status(200).json({success: `Item Deleted Successfully`});
 
     } catch (e) {
         res.status(400).json({error: "Failed to delete the item"})

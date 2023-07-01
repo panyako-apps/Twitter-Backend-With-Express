@@ -1,31 +1,119 @@
 import { Router } from "express";
+import { PrismaClient } from "@prisma/client";
+
 
 const router = Router();
+const prisma = new PrismaClient();
 
+//create Tweet 
+router.post('/', async (req, res)=>{
+    const {content, image, userId} = req.body;
 
-router.post('/', (req, res)=>{
-    res.status(501).json({error: 'Not implemented'})
+    try {
+        const result = await prisma.tweet.create({
+            data: {
+                content,
+                image, 
+                userId
+            }
+        });
+
+        res.status(201).json({
+            success: "Tweet Created Successfully", 
+            tweet: result
+        })
+
+    } catch (error) {
+        res.json({
+            error: "Failed to create tweet"
+        })
+    }
+
 })
 
-router.get('/', (req, res)=>{
-    res.status(501).json({error: 'Not implemented'})
+//List all tweets
+router.get('/', async (req, res)=>{
+
+    try {
+        const tweets = await prisma.tweet.findMany();
+        res.status(200).json(tweets)
+        
+    } catch (error) {
+        res.status(400).json({
+            error: "An error occurred while fetching tweets"
+        })
+    }
 })
 
-router.get('/:id', (req, res)=>{
+
+//Get single tweet
+router.get('/:id', async (req, res)=>{
+
+    const {id} = req.params;
+
+    try {
+        const tweet = await prisma.tweet.findUnique({where: {id: Number(id)}});
+        if(!tweet){
+            return res.status(404).json({error: "Tweet not Found"});
+        }    
+        
+        res.status(200).json(tweet);
+
+    } catch (error) {   
+        res.status(400).json({
+            error: "An error occured"
+        })
+    }
+   
+})
+
+
+//Update Tweet 
+router.put('/:id', async (req, res)=>{
+    const {id} = req.params;
+    const { content} = req.body;
+    try {
+        const tweet = await prisma.tweet.update({
+            where: {id: Number(id)},
+            data: {
+                content: content
+            }
+        })
+
+        if(!tweet){
+            return res.status(404).json({error: "Tweet not found"})
+        }
+
+        res.status(200).json({
+            success: "Tweet Updated Successfully", 
+            tweet: tweet
+        })
+
+
+    } catch (error) {
+        res.status(400).json({error: "An error occurred! Tweet not updated"})
+    }
+
+})
+
+//Delete a Tweet
+router.delete('/:id', async (req, res)=>{
     const {id} = req.params
-    res.status(501).json({error: `Get for id: ${id}, Not yet implemented`})
-})
-
-
-router.delete('/:id', (req, res)=>{
-    const {id} = req.params
-    res.status(501).json({error: `Delete for id: ${id}, Not yet implemented`})
-})
-
-
-router.put('/:id', (req, res)=>{
-    const {id} = req.params
-    res.status(501).json({error: `Update with id: ${id}, Not yet implemented`})
+    try {
+        const tweet = await prisma.tweet.delete({where: {id: Number(id)}})
+        if(!tweet){
+            res.status(404).json({
+                error: "Tweet not found"
+            })
+        }
+        res.status(200).json({
+            success: "Tweet deleted successfully"
+        })
+    } catch (error) {
+        res.status(400).json({
+            error: "An error occured ! Tweet not deleted."
+        });
+    }
 })
 
 
