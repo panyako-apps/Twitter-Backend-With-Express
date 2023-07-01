@@ -35,7 +35,18 @@ router.post('/', async (req, res)=>{
 router.get('/', async (req, res)=>{
 
     try {
-        const tweets = await prisma.tweet.findMany();
+        const tweets = await prisma.tweet.findMany({
+            include: { 
+                user: {
+                    select: {
+                        name: true,
+                        image: true
+                    }
+                }
+            }, 
+
+        });
+        
         res.status(200).json(tweets)
         
     } catch (error) {
