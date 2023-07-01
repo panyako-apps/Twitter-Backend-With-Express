@@ -1,32 +1,90 @@
 import { Router } from "express";
+import { PrismaClient } from "@prisma/client";
+
 
 const router = Router();
+const prisma = new PrismaClient();
 
 
-router.post('/', (req, res)=>{
-    res.status(501).json({error: 'Not implemented'})
+//create item
+router.post('/', async (req, res)=>{
+
+    const {name, email, username} = req.body;
+
+    try {
+        
+        const result = await prisma.user.create({
+            data: {
+                email, 
+                name,
+                username, 
+                bio: "I am new to this application",
+            }
+        })
+
+        if(result){
+            res.status(201).json(result)
+        }
+
+    } catch (e) {
+        res.status(400).json({error: "Username and password must be unique"})
+    }
 })
 
-router.get('/', (req, res)=>{
-    res.status(501).json({error: 'Not implemented'})
+//get all items 
+router.get('/', async (req, res)=>{
+    const allUsers = await prisma.user.findMany();
+    res.json(allUsers);
 })
 
-router.get('/:id', (req, res)=>{
+//get single item
+router.get('/:id', async (req, res)=>{
     const {id} = req.params
-    res.status(501).json({error: `Get for id: ${id}, Not yet implemented`})
+    const user = await prisma.user.findUnique({where: {id: Number(id)}})
+    res.json(user)
 })
 
 
-router.delete('/:id', (req, res)=>{
+//update an item
+router.put('/:id', async (req, res)=>{
     const {id} = req.params
-    res.status(501).json({error: `Delete for id: ${id}, Not yet implemented`})
+    const {bio, name, image } = req.body;
+    try {
+        const result = await prisma.user.update({
+            where: {id: Number(id)},
+            data: { bio, name, image}
+        });
+
+        if(result){
+
+            res.status(201).json({success: `Updated Successfully`})
+        }
+
+    } catch (e) {
+        res.status(400).json({error: "Failed to update the user"})
+    }
+    
 })
 
-
-router.put('/:id', (req, res)=>{
+//delete an item 
+router.delete('/:id', async (req, res)=>{
     const {id} = req.params
-    res.status(501).json({error: `Update with id: ${id}, Not yet implemented`})
-})
 
+    try {
+        const result = await prisma.user.delete({
+            where: {id: Number(id)}
+        });
+
+        if(result){
+
+            res.status(200).json({success: `Item Deleted Successfully`});
+            res.sendStatus(200);
+        }
+
+    } catch (e) {
+        res.status(400).json({error: "Failed to delete the item"})
+    }
+
+})
 
 export default router;
