@@ -39,24 +39,17 @@ router.get('/', async (req, res)=>{
             include: { 
                 user: {
                     select: {
-<<<<<<< HEAD
                         id: true,
                         name: true,
                         username: true,
-=======
-                        name: true,
->>>>>>> 8d8ae30eaf0105dbde241c0f73def7be29a9ec86
                         image: true
                     }
                 }
             }, 
 
         });
-<<<<<<< HEAD
 
-=======
         
->>>>>>> 8d8ae30eaf0105dbde241c0f73def7be29a9ec86
         res.status(200).json(tweets)
         
     } catch (error) {

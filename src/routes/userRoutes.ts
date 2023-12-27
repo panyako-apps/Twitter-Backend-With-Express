@@ -20,7 +20,7 @@ router.post('/', async (req, res)=>{
                 username, 
                 bio: "I am new to this application",
             }
-        })
+        }) 
 
         res.status(201).json(result)
 
