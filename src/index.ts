@@ -1,16 +1,15 @@
 import express from 'express'
-import userRoutes from './routes/userRoutes';
-import tweetRoutes from './routes/tweetRoutes'
-import authRoutes from './routes/authRoutes'
-
+import userRoutes from './routes/UserRoutes';
+import tweetRoutes from './routes/TweetRoutes'
+import authRoutes from './routes/AuthRoutes'
+import { authenticateToken } from './middlewares/AuthMiddleware'
 
 const app = express();
 
-
 app.use(express.json());
 app.use('/auth', authRoutes);
-app.use('/user',userRoutes);
-app.use('/tweet',tweetRoutes);
+app.use('/user', authenticateToken, userRoutes);
+app.use('/tweet', authenticateToken, tweetRoutes);
 
 app.get('/', (req, res)=>{
     res.send("Hello world");
